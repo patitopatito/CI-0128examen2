@@ -5,7 +5,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 const MaquinaDeCafe = () => {
 
   //Se crean las variables a utilizar y sus setters.
-  const [cafeSeleccionado, setCafeSeleccionado] = useState('');
+  const [tipoCafeSeleccionado, setTipoCafeSeleccionado] = useState('');
+  const [cantidadSeleccionada, setCantidadSeleccionada] = useState(1); // Se inicia con la cantidad predeterminada de 1
   const [cafes, setCafes] = useState([
     { tipo: 'Americano', cantidad: 10, precio: 850 },
     { tipo: 'Capuchino', cantidad: 8, precio: 950 },
@@ -15,12 +16,30 @@ const MaquinaDeCafe = () => {
 
   //Funcion que maneja la compra del cafe
   const realizarCompra = () => {
-    const indiceCafeSeleccionado = cafes.findIndex((cafe) => cafe.tipo === cafeSeleccionado);
-    if (indiceCafeSeleccionado !== -1 && cafes[indiceCafeSeleccionado].cantidad > 0) {
-      const cafesActualizados = [...cafes];
-      cafesActualizados[indiceCafeSeleccionado].cantidad--;
-      setCafes(cafesActualizados);
+    const indiceCafeSeleccionado = cafes.findIndex((cafe) => cafe.tipo === tipoCafeSeleccionado);
+
+    if (indiceCafeSeleccionado !== -1) {
+      const cafeSeleccionado = cafes[indiceCafeSeleccionado];
+      if (cantidadSeleccionada > 0 && cantidadSeleccionada <= cafeSeleccionado.cantidad) {
+        const cafesActualizados = [...cafes];
+        cafesActualizados[indiceCafeSeleccionado].cantidad -= cantidadSeleccionada;
+        setCafes(cafesActualizados);
+      } else {
+        alert('Cantidad inválida');
+      }
     }
+  };
+
+  //Funcion que calcula el costo total a partir del cafe seleccionado y la cantidad
+  const calcularCostoTotal = () => {
+    const indiceCafeSeleccionado = cafes.findIndex((cafe) => cafe.tipo === tipoCafeSeleccionado);
+
+    if (indiceCafeSeleccionado !== -1) {
+      const cafeSeleccionado = cafes[indiceCafeSeleccionado];
+      return cantidadSeleccionada * cafeSeleccionado.precio;
+    }
+
+    return 0;
   };
 
   //Se devuelve el componente
@@ -38,8 +57,8 @@ const MaquinaDeCafe = () => {
 
       <div className="row justify-content-center mt-4">
         <div className="col-md-6">
-          <select className="form-control" onChange={(e) => setCafeSeleccionado(e.target.value)}>
-            <option value="">Selecciona el tipo de café...</option>
+          <select className="form-control" onChange={(e) => setTipoCafeSeleccionado(e.target.value)}>
+            <option value="">Seleccione el tipo de café...</option>
             {cafes.map((cafe, index) => (
               <option key={index} value={cafe.tipo}>
                 {cafe.tipo}
@@ -51,9 +70,27 @@ const MaquinaDeCafe = () => {
 
       <div className="row justify-content-center mt-2">
         <div className="col-md-6">
+          <label>Cantidad:</label>
+          <input
+            type="number"
+            className="form-control"
+            value={cantidadSeleccionada}
+            onChange={(e) => setCantidadSeleccionada(parseInt(e.target.value))}
+          />
+        </div>
+      </div>
+
+      <div className="row justify-content-center mt-2">
+        <div className="col-md-6">
           <button className="btn btn-primary btn-block" onClick={realizarCompra}>
             Comprar
           </button>
+        </div>
+      </div>
+
+      <div className="row justify-content-center mt-2">
+        <div className="col-md-6">
+          <p>Total: {calcularCostoTotal()} colones</p>
         </div>
       </div>
     </div>
