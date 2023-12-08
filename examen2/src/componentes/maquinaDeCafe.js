@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import CoffeeItem from './cafeItem';
+import CafeItem from './cafeItem';
+import  MaquinaDeCafeHTML  from './maquinaDeCafeHTML';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const MaquinaDeCafe = () => {
@@ -8,6 +9,7 @@ const MaquinaDeCafe = () => {
   const [tipoCafeSeleccionado, setTipoCafeSeleccionado] = useState('');
   const [cantidadSeleccionada, setCantidadSeleccionada] = useState(0);
   const [dineroIngresado, setDineroIngresado] = useState(0);
+  const [vuelto, setVuelto] = useState({ monto: 0, desglose: [] });
   const [cafes, setCafes] = useState([
     { tipo: 'Americano', cantidad: 10, precio: 850 },
     { tipo: 'Capuchino', cantidad: 8, precio: 950 },
@@ -22,23 +24,41 @@ const MaquinaDeCafe = () => {
     25: 25,
   };
   const [cantidadMonedas, setCantidadMonedas] = useState({ ...cantidadesIniciales });
-  
-  //Funcion que maneja la compra del cafe
+
+  // Funcion que maneja la compra del cafe
   const realizarCompra = () => {
+    // Busca el cafe seleccionado
     const indiceCafeSeleccionado = cafes.findIndex((cafe) => cafe.tipo === tipoCafeSeleccionado);
-  
+    
+    //Verifica que sea un cafe válido
     if (indiceCafeSeleccionado !== -1) {
       const cafeSeleccionado = cafes[indiceCafeSeleccionado];
       const costoTotal = cantidadSeleccionada * cafeSeleccionado.precio;
-  
+
+      //Verifica que haya suficiente dinero
       if (dineroIngresado >= costoTotal) {
+
+        //Verifica que haya suficiente cafe disponible
         if (cafeSeleccionado.cantidad > 0 && cantidadSeleccionada <= cafeSeleccionado.cantidad) {
-          const cafesActualizados = [...cafes];
-          cafesActualizados[indiceCafeSeleccionado].cantidad -= cantidadSeleccionada;
-          setCafes(cafesActualizados);
-          setDineroIngresado(0);
-          setTipoCafeSeleccionado('');
-          setCantidadSeleccionada(0);
+          const vuelto = dineroIngresado - costoTotal;
+          
+          //Verifica que haya suficientes monedas para dar el vuelto
+          if (verificarMonedasSuficientes(vuelto)){
+            // Calcula la cantidad de monedas de cada denominación
+            let desgloseMonedas = calcularVuelto(vuelto);
+    
+            setVuelto({ monto: vuelto, desglose: desgloseMonedas });
+    
+            // Restablece los estados de los selectores
+            const cafesActualizados = [...cafes];
+            cafesActualizados[indiceCafeSeleccionado].cantidad -= cantidadSeleccionada;
+            setCafes(cafesActualizados);
+            setDineroIngresado(0);
+            setTipoCafeSeleccionado('');
+            setCantidadSeleccionada(1);
+          }else{
+            alert('FUERA DE SERVICIO!');
+          }
         } else {
           alert('Cantidad de café insuficiente');
         }
@@ -48,7 +68,82 @@ const MaquinaDeCafe = () => {
     }
   };
 
-  //Funcion que maneja la adicion de dinero
+  // Funcion para calcular el desglose
+  const calcularVuelto = (vuelto) =>{
+    const desgloseMonedas = [];
+    let cantidadActual = vuelto;
+
+    // Monedas de 500
+    const monedas500 = Math.floor(cantidadActual / 500);
+    if (monedas500 > 0) {
+      desgloseMonedas.push({ valor: 500, cantidad: monedas500 });
+      cantidadActual -= monedas500 * 500;
+      const nuevaCantidadMonedas500=cantidadMonedas[500]- monedas500;
+      setCantidadMonedas(nuevaCantidadMonedas500);
+    }
+
+    // Monedas de 100
+    const monedas100 = Math.floor(cantidadActual / 100);
+    if (monedas100 > 0) {
+      desgloseMonedas.push({ valor: 100, cantidad: monedas100 });
+      cantidadActual -= monedas100 * 100;
+      const nuevaCantidadMonedas100=cantidadMonedas[100]- monedas100;
+      setCantidadMonedas(nuevaCantidadMonedas100);
+    }
+
+    // Monedas de 50
+    const monedas50 = Math.floor(cantidadActual / 50);
+    if (monedas50 > 0) {
+      desgloseMonedas.push({ valor: 50, cantidad: monedas50 });
+      cantidadActual -= monedas50 * 50;
+      const nuevaCantidadMonedas50=cantidadMonedas[50]- monedas50;
+      setCantidadMonedas(nuevaCantidadMonedas50);
+    }
+
+    // Monedas de 25
+    const monedas25 = Math.floor(cantidadActual / 25);
+    if (monedas25 > 0) {
+      desgloseMonedas.push({ valor: 25, cantidad: monedas25 });
+      cantidadActual -= monedas25 * 25;
+      const nuevaCantidadMonedas25=cantidadMonedas[25]- monedas25;
+      setCantidadMonedas(nuevaCantidadMonedas25);
+    }
+
+    return desgloseMonedas;
+  };
+
+  // Funcion que verifica si hay suficientes monedas disponibles para dar el vuelto
+  const verificarMonedasSuficientes = (vuelto) => {
+    const monedasDisponibles = { ...cantidadMonedas };
+    let cantidadActual = vuelto;
+
+    const monedas500 = Math.floor(cantidadActual / 500);
+    if (monedas500 > monedasDisponibles[500]) {
+      return false;
+    }
+    cantidadActual -= monedas500 * 500;
+
+    const monedas100 = Math.floor(cantidadActual / 100);
+    if (monedas100 > monedasDisponibles[100]) {
+      return false;
+    }
+    cantidadActual -= monedas100 * 100;
+
+    const monedas50 = Math.floor(cantidadActual / 50);
+    if (monedas50 > monedasDisponibles[50]) {
+      return false;
+    }
+    cantidadActual -= monedas50* 50;
+  
+    const monedas25 = Math.floor(cantidadActual / 25);
+    if (monedas25 > monedasDisponibles[25]) {
+      return false;
+    }
+  
+    return true;
+  };
+
+  // Funcion para agregar dinero
   const agregarDinero = (denominacion) => {
     const dineroActualizado = { ...cantidadMonedas };
     dineroActualizado[denominacion]++;
@@ -56,96 +151,36 @@ const MaquinaDeCafe = () => {
     setDineroIngresado(dineroIngresado + parseInt(denominacion));
   };
 
+  // Funcion para calcular el costo de la orden 
   const calcularCostoTotal = () => {
     const indiceCafeSeleccionado = cafes.findIndex((cafe) => cafe.tipo === tipoCafeSeleccionado);
-
     if (indiceCafeSeleccionado !== -1) {
       const cafeSeleccionado = cafes[indiceCafeSeleccionado];
       return cantidadSeleccionada * cafeSeleccionado.precio;
     }
-
     return 0;
   };
-  //Se devuelve el componente
+
+  //Variables y funcionnes necesarias para el componente 
+	const props = {
+    cafes,
+    CafeItem,
+    tipoCafeSeleccionado,
+    setTipoCafeSeleccionado,                    
+    cantidadSeleccionada,
+    setCantidadSeleccionada,
+    calcularCostoTotal,       
+    realizarCompra,           
+    dineroIngresado,          
+    agregarDinero,            
+    vuelto                   
+	};
+
+  // Se devuelve el componente
   return (
-    <div className="container text-center mt-4">
-      <h1>Máquina de Café</h1>
-
-      <div className="row justify-content-center">
-        {cafes.map((cafe, index) => (
-          <div key={index} className="col-md-6 mb-4">
-            <CoffeeItem {...cafe} />
-          </div>
-        ))}
-      </div>
-
-      <div className="row justify-content-center mt-4">
-        <div className="col-md-6">
-          <select
-            className="form-control"
-            value={tipoCafeSeleccionado}
-            onChange={(e) => setTipoCafeSeleccionado(e.target.value)}
-          >
-            <option value="">Seleccione el tipo de café...</option>
-            {cafes.map((cafe, index) => (
-              <option key={index} value={cafe.tipo}>
-                {cafe.tipo}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className="row justify-content-center mt-2">
-        <div className="col-md-6">
-          <label>Cantidad:</label>
-          <input
-            type="number"
-            className="form-control"
-            value={tipoCafeSeleccionado === '' ? 0 : cantidadSeleccionada}
-            onChange={(e) => setCantidadSeleccionada(parseInt(e.target.value))}
-          />
-        </div>
-      </div>
-
-      <div className="row justify-content-center mt-2">
-        <div className="col-md-6">
-          <p>Total: {calcularCostoTotal()} colones</p>
-        </div>
-      </div>
-
-      <div className="row justify-content-center mt-2">
-        <div className="col-md-6">
-          <button className="btn btn-primary btn-block" onClick={realizarCompra}>
-            Comprar
-          </button>
-        </div>
-      </div>
-
-      <div className="row justify-content-center mt-4">
-        <div className="col-md-6">
-          <h2>Agregar Dinero</h2>
-          <p>Dinero agregado: {dineroIngresado} colones</p>
-          <div className="btn-group">
-            <button className="btn btn-secondary" onClick={() => agregarDinero('1000')}>
-              ₡1000
-            </button>
-            <button className="btn btn-secondary" onClick={() => agregarDinero('500')}>
-              ₡500
-            </button>
-            <button className="btn btn-secondary" onClick={() => agregarDinero('100')}>
-              ₡100
-            </button>
-            <button className="btn btn-secondary" onClick={() => agregarDinero('50')}>
-              ₡50
-            </button>
-            <button className="btn btn-secondary" onClick={() => agregarDinero('2')}>
-              ₡25
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+            <>
+              <MaquinaDeCafeHTML {...props}/>
+            </>
   );
 };
 
