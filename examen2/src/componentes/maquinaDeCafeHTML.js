@@ -1,6 +1,6 @@
 import React from "react";
 const MaquinaDeCafeHTML  = (props) => {
-    
+
     // Se extraen las variables pasadas por parametro
 	const {
         cafes,
@@ -92,7 +92,7 @@ const MaquinaDeCafeHTML  = (props) => {
                 <button className="btn btn-secondary" onClick={() => agregarDinero('50')}>
                 ₡50
                 </button>
-                <button className="btn btn-secondary" onClick={() => agregarDinero('2')}>
+                <button className="btn btn-secondary" onClick={() => agregarDinero('25')}>
                 ₡25
                 </button>
             </div>

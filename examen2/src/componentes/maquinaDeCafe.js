@@ -31,7 +31,7 @@ const MaquinaDeCafe = () => {
 
     for (const denominacion of denominaciones) {
       if (cantidadMonedas[denominacion] === 0) {
-        alert(`¡Aviso! La máquina está fuera de servicio. Denominación ${denominacion} agotada.`);
+        alert(`La máquina está fuera de servicio. Monedas de ${denominacion} agotada(s).`);
       }
     }
   };
