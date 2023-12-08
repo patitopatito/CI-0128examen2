@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CafeItem from './cafeItem';
 import  MaquinaDeCafeHTML  from './maquinaDeCafeHTML';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -24,6 +24,26 @@ const MaquinaDeCafe = () => {
     25: 25,
   };
   const [cantidadMonedas, setCantidadMonedas] = useState({ ...cantidadesIniciales });
+
+ // Funcion que verifica si hay monedas para todas las denominaciones
+  const verificarMonedasAgotadas = () => {
+    const denominaciones = Object.keys(cantidadMonedas);
+
+    for (const denominacion of denominaciones) {
+      if (cantidadMonedas[denominacion] === 0) {
+        alert(`¡Aviso! La máquina está fuera de servicio. Denominación ${denominacion} agotada.`);
+      }
+    }
+  };
+
+  //Se establece que la verificacion se haga cada 5 segundos
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      verificarMonedasAgotadas();
+    }, 5000); 
+
+    return () => clearInterval(intervalId);
+  });
 
   // Funcion que maneja la compra del cafe
   const realizarCompra = () => {
@@ -57,7 +77,7 @@ const MaquinaDeCafe = () => {
             setTipoCafeSeleccionado('');
             setCantidadSeleccionada(1);
           }else{
-            alert('FUERA DE SERVICIO!');
+            alert('Fallo al realizar la compra');
           }
         } else {
           alert('Cantidad de café insuficiente');
@@ -78,8 +98,9 @@ const MaquinaDeCafe = () => {
     if (monedas500 > 0) {
       desgloseMonedas.push({ valor: 500, cantidad: monedas500 });
       cantidadActual -= monedas500 * 500;
-      const nuevaCantidadMonedas500=cantidadMonedas[500]- monedas500;
-      setCantidadMonedas(nuevaCantidadMonedas500);
+      const nuevaCantidadMonedas = { ...cantidadMonedas };
+      nuevaCantidadMonedas[500] -= monedas500;
+      setCantidadMonedas(nuevaCantidadMonedas);
     }
 
     // Monedas de 100
@@ -87,8 +108,9 @@ const MaquinaDeCafe = () => {
     if (monedas100 > 0) {
       desgloseMonedas.push({ valor: 100, cantidad: monedas100 });
       cantidadActual -= monedas100 * 100;
-      const nuevaCantidadMonedas100=cantidadMonedas[100]- monedas100;
-      setCantidadMonedas(nuevaCantidadMonedas100);
+      const nuevaCantidadMonedas = { ...cantidadMonedas };
+      nuevaCantidadMonedas[100] -= monedas100;
+      setCantidadMonedas(nuevaCantidadMonedas);
     }
 
     // Monedas de 50
@@ -96,8 +118,9 @@ const MaquinaDeCafe = () => {
     if (monedas50 > 0) {
       desgloseMonedas.push({ valor: 50, cantidad: monedas50 });
       cantidadActual -= monedas50 * 50;
-      const nuevaCantidadMonedas50=cantidadMonedas[50]- monedas50;
-      setCantidadMonedas(nuevaCantidadMonedas50);
+      const nuevaCantidadMonedas = { ...cantidadMonedas };
+      nuevaCantidadMonedas[50] -= monedas50;
+      setCantidadMonedas(nuevaCantidadMonedas);
     }
 
     // Monedas de 25
@@ -105,8 +128,9 @@ const MaquinaDeCafe = () => {
     if (monedas25 > 0) {
       desgloseMonedas.push({ valor: 25, cantidad: monedas25 });
       cantidadActual -= monedas25 * 25;
-      const nuevaCantidadMonedas25=cantidadMonedas[25]- monedas25;
-      setCantidadMonedas(nuevaCantidadMonedas25);
+      const nuevaCantidadMonedas = { ...cantidadMonedas };
+      nuevaCantidadMonedas[25] -= monedas25;
+      setCantidadMonedas(nuevaCantidadMonedas);
     }
 
     return desgloseMonedas;
